@@ -406,14 +406,14 @@ public class JsonMessageFormatter : IJsonRpcAsyncMessageTextFormatter, IJsonRpcF
                         json["method"] is not null ? this.ReadRequest(json) :
                         json["error"]?.Type == JTokenType.Null ? this.ReadResult(json) :
                         json["error"] is { Type: not JTokenType.Null } ? this.ReadError(json) :
-                        throw this.CreateProtocolNonComplianceException(json);
+                        this.DeserializeNonStandard(json);
                 case 2:
                     this.VerifyProtocolCompliance(json.Value<string>("jsonrpc") == "2.0", json, $"\"jsonrpc\" property must be set to \"2.0\", or set {nameof(this.ProtocolVersion)} to 1.0 mode.");
                     return
                         json["method"] is not null ? this.ReadRequest(json) :
                         json["result"] is not null ? this.ReadResult(json) :
                         json["error"] is not null ? this.ReadError(json) :
-                        throw this.CreateProtocolNonComplianceException(json);
+                        this.DeserializeNonStandard(json);
                 default:
                     throw Assumes.NotReachable();
             }
@@ -428,6 +428,16 @@ public class JsonMessageFormatter : IJsonRpcAsyncMessageTextFormatter, IJsonRpcF
 
             throw serializationException;
         }
+    }
+
+    /// <summary>
+    /// Deserializes an unexpected <see cref="JToken"/> to a <see cref="JsonRpcMessage"/>.
+    /// </summary>
+    /// <param name="json">The JSON to deserialize.</param>
+    /// <returns>The deserialized message.</returns>
+    protected virtual JsonRpcMessage DeserializeNonStandard(JToken json)
+    {
+        throw this.CreateProtocolNonComplianceException(json);
     }
 
     /// <summary>
