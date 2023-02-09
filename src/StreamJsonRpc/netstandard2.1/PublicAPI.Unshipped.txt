@@ -9,7 +9,6 @@ StreamJsonRpc.ExceptionSettings.RecursionLimit.init -> void
 StreamJsonRpc.JsonMessageFormatter.ReadWarning(Newtonsoft.Json.Linq.JToken! json) -> StreamJsonRpc.Protocol.JsonRpcMessage!
 StreamJsonRpc.JsonRpc.ExceptionOptions.get -> StreamJsonRpc.ExceptionSettings!
 StreamJsonRpc.JsonRpc.ExceptionOptions.set -> void
-StreamJsonRpc.JsonRpc.HandleIncomingNonStandardMessageAsync(StreamJsonRpc.Protocol.JsonRpcMessage! message) -> System.Threading.Tasks.Task!
 StreamJsonRpc.JsonRpcIgnoreAttribute
 StreamJsonRpc.JsonRpcIgnoreAttribute.JsonRpcIgnoreAttribute() -> void
 StreamJsonRpc.JsonRpcMethodAttribute.ClientRequiresNamedArguments.get -> bool
@@ -41,6 +40,8 @@ StreamJsonRpc.RpcMarshalableOptionalInterfaceAttribute.RpcMarshalableOptionalInt
 StreamJsonRpc.RpcMarshalableOptionalInterfaceAttribute.OptionalInterface.get -> System.Type!
 StreamJsonRpc.RpcMarshalableOptionalInterfaceAttribute.OptionalInterfaceCode.get -> int
 virtual StreamJsonRpc.JsonMessageFormatter.DeserializeNonStandard(Newtonsoft.Json.Linq.JToken! json) -> StreamJsonRpc.Protocol.JsonRpcMessage!
+virtual StreamJsonRpc.JsonRpc.HandleUnexpectedIncomingNotStandardMessageAsync(StreamJsonRpc.Protocol.JsonRpcMessage! message) -> System.Threading.Tasks.Task!
+virtual StreamJsonRpc.JsonRpc.HandleUnrecognizedIncomingNonStandardMessageAsync(StreamJsonRpc.Protocol.JsonRpcMessage! message) -> System.Threading.Tasks.Task!
 virtual StreamJsonRpc.JsonRpc.SendAsync(StreamJsonRpc.Protocol.JsonRpcMessage! message, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.ValueTask
 virtual StreamJsonRpc.Protocol.JsonRpcWarning.WarningDetail.GetData(System.Type! dataType) -> object?
 virtual StreamJsonRpc.Protocol.JsonRpcWarning.WarningDetail.SetExpectedDataType(System.Type! dataType) -> void

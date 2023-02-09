@@ -2567,15 +2567,13 @@ public class JsonRpc : IDisposableObservable, IJsonRpcFormatterCallbacks, IJsonR
                 else
                 {
                     // Unexpected "response" to no request we have a record of. Raise disconnected event.
-                    this.OnJsonRpcDisconnected(new JsonRpcDisconnectedEventArgs(
-                        Resources.UnexpectedResponseWithNoMatchingRequest,
-                        DisconnectedReason.RemoteProtocolViolation));
+                    await HandleUnexpectedIncomingNotStandardMessageAsync(rpc).ConfigureAwait(false);
                 }
             }
             else
             {
                 // Not a request or result/error. Raise disconnected event.
-                await HandleIncomingNonStandardMessageAsync(rpc).ConfigureAwait(false);
+                await HandleUnrecognizedIncomingNonStandardMessageAsync(rpc).ConfigureAwait(false);
             }
         }
 #pragma warning disable CA1031 // Do not catch general exception types
@@ -2596,11 +2594,24 @@ public class JsonRpc : IDisposableObservable, IJsonRpcFormatterCallbacks, IJsonR
     }
 
     /// <summary>
-    /// Handles an incoming non-standard message.
+    /// Handles an unexpected response to a missing request non-standard message.
     /// </summary>
     /// <param name="message">The incoming message.</param>
     /// <returns>A <see cref="Task"/> that completes after the message is handled.</returns>
-    protected virtual Task HandleIncomingNonStandardMessageAsync(JsonRpcMessage message)
+    protected virtual Task HandleUnexpectedIncomingNotStandardMessageAsync(JsonRpcMessage message)
+    {
+        this.OnJsonRpcDisconnected(new JsonRpcDisconnectedEventArgs(
+                                Resources.UnexpectedResponseWithNoMatchingRequest,
+                                DisconnectedReason.RemoteProtocolViolation));
+        return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// Handles an unrecognized incoming non-standard message.
+    /// </summary>
+    /// <param name="message">The incoming message.</param>
+    /// <returns>A <see cref="Task"/> that completes after the message is handled.</returns>
+    protected virtual Task HandleUnrecognizedIncomingNonStandardMessageAsync(JsonRpcMessage message)
     {
         this.OnJsonRpcDisconnected(new JsonRpcDisconnectedEventArgs(
                             Resources.UnrecognizedIncomingJsonRpc,
