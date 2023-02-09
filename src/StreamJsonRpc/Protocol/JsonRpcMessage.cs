@@ -14,6 +14,7 @@ namespace StreamJsonRpc.Protocol;
 [KnownType(typeof(JsonRpcRequest))]
 [KnownType(typeof(JsonRpcResult))]
 [KnownType(typeof(JsonRpcError))]
+[KnownType(typeof(JsonRpcWarning))]
 public abstract class JsonRpcMessage
 {
     /// <summary>

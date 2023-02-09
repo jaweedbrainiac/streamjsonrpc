@@ -2575,9 +2575,7 @@ public class JsonRpc : IDisposableObservable, IJsonRpcFormatterCallbacks, IJsonR
             else
             {
                 // Not a request or result/error. Raise disconnected event.
-                this.OnJsonRpcDisconnected(new JsonRpcDisconnectedEventArgs(
-                    Resources.UnrecognizedIncomingJsonRpc,
-                    DisconnectedReason.ParseError));
+                await HandleIncomingNonStandardMessageAsync(rpc).ConfigureAwait(false);
             }
         }
 #pragma warning disable CA1031 // Do not catch general exception types
@@ -2595,6 +2593,19 @@ public class JsonRpc : IDisposableObservable, IJsonRpcFormatterCallbacks, IJsonR
             // If we extracted this callback from the collection already, take care to complete it to avoid hanging our client.
             data?.CompletionHandler(null);
         }
+    }
+
+    /// <summary>
+    /// Handles an incoming non-standard message.
+    /// </summary>
+    /// <param name="message">The incoming message.</param>
+    /// <returns>A <see cref="Task"/> that completes after the message is handled.</returns>
+    protected Task HandleIncomingNonStandardMessageAsync(JsonRpcMessage message)
+    {
+        this.OnJsonRpcDisconnected(new JsonRpcDisconnectedEventArgs(
+                            Resources.UnrecognizedIncomingJsonRpc,
+                            DisconnectedReason.ParseError));
+        return Task.CompletedTask;
     }
 
     private void FaultPendingRequests()

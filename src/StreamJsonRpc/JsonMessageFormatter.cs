@@ -841,12 +841,48 @@ public class JsonMessageFormatter : IJsonRpcAsyncMessageTextFormatter, IJsonRpcF
         };
     }
 
+    /// <summary>
+    /// Reads warning from the given json token.
+    /// </summary>
+    /// <param name="json">The JSON token.</param>
+    /// <returns>The warning message.</returns>
+    protected JsonRpcMessage ReadWarning(JToken json)
+    {
+        Requires.NotNull(json, nameof(json));
+
+        RequestId id = this.ExtractRequestId(json);
+        JToken? warning = json["warning"];
+        Assumes.NotNull(warning); // callers should have verified this already.
+        return new JsonRpcWarning(this.JsonSerializer)
+        {
+            RequestId = id,
+            Warning = new WarningDetail(this.JsonSerializer)
+            {
+                Code = (JsonRpcErrorCode)warning.Value<long>("code"),
+                Message = warning.Value<string>("message"),
+                Data = warning["data"], // leave this as a JToken. We deserialize inside GetData<T>
+            },
+            TopLevelPropertyBag = new TopLevelPropertyBag(this.JsonSerializer, (JObject)json),
+        };
+    }
+
     private RequestId ExtractRequestId(JToken json)
+    {
+        RequestId id = this.TryExtractRequestId(json);
+        if (id.IsNull)
+        {
+            throw this.CreateProtocolNonComplianceException(json, "\"id\" property missing.");
+        }
+
+        return id;
+    }
+
+    private RequestId TryExtractRequestId(JToken json)
     {
         JToken? idToken = json["id"];
         if (idToken is null)
         {
-            throw this.CreateProtocolNonComplianceException(json, "\"id\" property missing.");
+            return RequestId.Null;
         }
 
         RequestId id = this.NormalizeId(idToken.ToObject<RequestId>(DefaultSerializer));
@@ -1163,12 +1199,81 @@ public class JsonMessageFormatter : IJsonRpcAsyncMessageTextFormatter, IJsonRpcF
         }
     }
 
+    private class JsonRpcWarning : Protocol.JsonRpcWarning, IMessageWithTopLevelPropertyBag
+    {
+        private readonly JsonSerializer jsonSerializer;
+
+        internal JsonRpcWarning(JsonSerializer jsonSerializer)
+        {
+            this.jsonSerializer = Requires.NotNull(jsonSerializer, nameof(jsonSerializer));
+        }
+
+        [JsonIgnore]
+        [IgnoreDataMember]
+        public TopLevelPropertyBag? TopLevelPropertyBag { get; set; }
+
+        public override bool TryGetTopLevelProperty<T>(string name, [MaybeNull] out T value)
+        {
+            Requires.NotNullOrEmpty(name, nameof(name));
+            Requires.Argument(!Constants.Error.IsPropertyReserved(name), nameof(name), Resources.ReservedPropertyName);
+
+            value = default;
+            return this.TopLevelPropertyBag is not null && this.TopLevelPropertyBag.TryGetTopLevelProperty<T>(name, out value);
+        }
+
+        public override bool TrySetTopLevelProperty<T>(string name, [MaybeNull] T value)
+        {
+            Requires.NotNullOrEmpty(name, nameof(name));
+            Requires.Argument(!Constants.Error.IsPropertyReserved(name), nameof(name), Resources.ReservedPropertyName);
+
+            this.TopLevelPropertyBag ??= new TopLevelPropertyBag(this.jsonSerializer);
+            this.TopLevelPropertyBag.SetTopLevelProperty<T>(name, value);
+            return true;
+        }
+    }
+
     [DataContract]
     private class ErrorDetail : Protocol.JsonRpcError.ErrorDetail
     {
         private readonly JsonSerializer jsonSerializer;
 
         internal ErrorDetail(JsonSerializer jsonSerializer)
+        {
+            this.jsonSerializer = jsonSerializer ?? throw new ArgumentNullException(nameof(jsonSerializer));
+        }
+
+        public override object? GetData(Type dataType)
+        {
+            Requires.NotNull(dataType, nameof(dataType));
+
+            var data = (JToken?)this.Data;
+            if (data?.Type == JTokenType.Null)
+            {
+                Verify.Operation(!dataType.GetTypeInfo().IsValueType || Nullable.GetUnderlyingType(dataType) is not null, "null result is not assignable to a value type.");
+                return default!;
+            }
+
+            try
+            {
+                return data?.ToObject(dataType, this.jsonSerializer);
+            }
+            catch (JsonReaderException)
+            {
+                return data;
+            }
+            catch (JsonSerializationException)
+            {
+                return data;
+            }
+        }
+    }
+
+    [DataContract]
+    private class WarningDetail : Protocol.JsonRpcWarning.WarningDetail
+    {
+        private readonly JsonSerializer jsonSerializer;
+
+        internal WarningDetail(JsonSerializer jsonSerializer)
         {
             this.jsonSerializer = jsonSerializer ?? throw new ArgumentNullException(nameof(jsonSerializer));
         }
