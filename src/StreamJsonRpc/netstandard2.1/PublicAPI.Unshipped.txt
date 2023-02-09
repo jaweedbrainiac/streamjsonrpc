@@ -29,7 +29,7 @@ StreamJsonRpc.Protocol.JsonRpcWarning.WarningDetail.Code.set -> void
 StreamJsonRpc.Protocol.JsonRpcWarning.WarningDetail.Data.get -> object?
 StreamJsonRpc.Protocol.JsonRpcWarning.WarningDetail.Data.set -> void
 StreamJsonRpc.Protocol.JsonRpcWarning.WarningDetail.GetData<T>() -> T
-StreamJsonRpc.Protocol.JsonRpcWarning.WarningDetail.Message.get -> string?
+StreamJsonRpc.Protocol.JsonRpcWarning.WarningDetail.Message.get -> object?
 StreamJsonRpc.Protocol.JsonRpcWarning.WarningDetail.Message.set -> void
 StreamJsonRpc.Protocol.JsonRpcWarning.WarningDetail.WarningDetail() -> void
 StreamJsonRpc.Reflection.MessageFormatterProgressTracker.CreateProgress(StreamJsonRpc.JsonRpc! rpc, object! token, System.Type! valueType, bool clientRequiresNamedArguments) -> object!

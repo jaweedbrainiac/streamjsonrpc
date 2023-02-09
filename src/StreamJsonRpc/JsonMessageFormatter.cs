@@ -859,7 +859,7 @@ public class JsonMessageFormatter : IJsonRpcAsyncMessageTextFormatter, IJsonRpcF
             Warning = new WarningDetail(this.JsonSerializer)
             {
                 Code = (JsonRpcErrorCode)warning.Value<long>("code"),
-                Message = warning.Value<string>("message"),
+                Message = warning["message"],
                 Data = warning["data"], // leave this as a JToken. We deserialize inside GetData<T>
             },
             TopLevelPropertyBag = new TopLevelPropertyBag(this.JsonSerializer, (JObject)json),

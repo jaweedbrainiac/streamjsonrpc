@@ -77,7 +77,7 @@ namespace StreamJsonRpc.Protocol
             /// The message SHOULD be limited to a concise single sentence.
             /// </remarks>
             [DataMember(Name = "message", Order = 1, IsRequired = true)]
-            public string? Message { get; set; }
+            public object? Message { get; set; }
 
             /// <summary>
             /// Gets or sets additional data about the error.
