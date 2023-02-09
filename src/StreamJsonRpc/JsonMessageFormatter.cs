@@ -850,7 +850,7 @@ public class JsonMessageFormatter : IJsonRpcAsyncMessageTextFormatter, IJsonRpcF
     {
         Requires.NotNull(json, nameof(json));
 
-        RequestId id = this.ExtractRequestId(json);
+        RequestId id = this.TryExtractRequestId(json);
         JToken? warning = json["warning"];
         Assumes.NotNull(warning); // callers should have verified this already.
         return new JsonRpcWarning(this.JsonSerializer)

@@ -2600,7 +2600,7 @@ public class JsonRpc : IDisposableObservable, IJsonRpcFormatterCallbacks, IJsonR
     /// </summary>
     /// <param name="message">The incoming message.</param>
     /// <returns>A <see cref="Task"/> that completes after the message is handled.</returns>
-    protected Task HandleIncomingNonStandardMessageAsync(JsonRpcMessage message)
+    protected virtual Task HandleIncomingNonStandardMessageAsync(JsonRpcMessage message)
     {
         this.OnJsonRpcDisconnected(new JsonRpcDisconnectedEventArgs(
                             Resources.UnrecognizedIncomingJsonRpc,
