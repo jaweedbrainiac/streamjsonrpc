@@ -6,6 +6,8 @@ StreamJsonRpc.ExceptionSettings
 StreamJsonRpc.ExceptionSettings.ExceptionSettings(int recursionLimit) -> void
 StreamJsonRpc.ExceptionSettings.RecursionLimit.get -> int
 StreamJsonRpc.ExceptionSettings.RecursionLimit.init -> void
+StreamJsonRpc.JsonMessageFormatter.IgnoreMissingVersion.get -> bool
+StreamJsonRpc.JsonMessageFormatter.IgnoreMissingVersion.set -> void
 StreamJsonRpc.JsonMessageFormatter.ReadWarning(Newtonsoft.Json.Linq.JToken! json) -> StreamJsonRpc.Protocol.JsonRpcMessage!
 StreamJsonRpc.JsonRpc.ExceptionOptions.get -> StreamJsonRpc.ExceptionSettings!
 StreamJsonRpc.JsonRpc.ExceptionOptions.set -> void

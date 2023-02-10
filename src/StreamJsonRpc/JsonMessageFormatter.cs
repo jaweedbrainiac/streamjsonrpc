@@ -210,6 +210,11 @@ public class JsonMessageFormatter : IJsonRpcAsyncMessageTextFormatter, IJsonRpcF
     }
 
     /// <summary>
+    /// Gets or sets a value indicating whether to throw a protocol compliance exception if version is missing. Default is false.
+    /// </summary>
+    public bool IgnoreMissingVersion { get; set; }
+
+    /// <summary>
     /// Gets or sets the encoding to use for transmitted messages.
     /// </summary>
     public Encoding Encoding
@@ -408,7 +413,11 @@ public class JsonMessageFormatter : IJsonRpcAsyncMessageTextFormatter, IJsonRpcF
                         json["error"] is { Type: not JTokenType.Null } ? this.ReadError(json) :
                         this.DeserializeNonStandard(json);
                 case 2:
-                    this.VerifyProtocolCompliance(json.Value<string>("jsonrpc") == "2.0", json, $"\"jsonrpc\" property must be set to \"2.0\", or set {nameof(this.ProtocolVersion)} to 1.0 mode.");
+                    if (!this.IgnoreMissingVersion)
+                    {
+                        this.VerifyProtocolCompliance(json.Value<string>("jsonrpc") == "2.0", json, $"\"jsonrpc\" property must be set to \"2.0\", or set {nameof(this.ProtocolVersion)} to 1.0 mode.");
+                    }
+
                     return
                         json["method"] is not null ? this.ReadRequest(json) :
                         json["result"] is not null ? this.ReadResult(json) :
